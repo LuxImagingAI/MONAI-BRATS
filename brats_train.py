@@ -69,7 +69,7 @@ val_interval = 1
 VAL_AMP = True
 
 # standard PyTorch program style: create SegResNet, DiceLoss and Adam optimizer
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = SegResNet(
     blocks_down=(1, 2, 2, 4),
     blocks_up=(1, 1, 1),
@@ -113,13 +113,16 @@ def inference(input):
 torch.backends.cudnn.benchmark = True
 
 # create training procedure
-trainer = SupervisedTrainer(device=device, max_epochs=1, train_data_loader=train_loader, network=model, optimizer=lr_scheduler, loss_function=dice_metric)
+trainer = SupervisedTrainer(device=device, max_epochs=1, train_data_loader=train_loader, network=model, optimizer=optimizer, loss_function=loss_function, key_train_metric={"dice_metric":dice_metric, "dice_metric_batch":dice_metric_batch},amp=False)
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def _print_loss(engine):
     print(f"Epoch {engine.state.epoch}/{engine.state.max_epochs} Loss: {engine.state.output[0]['loss']}")
-
+    lr_scheduler.step()
 
 trainer.run()
+
+torch.jit.script(model).save("classifier.zip")
+
 
 
