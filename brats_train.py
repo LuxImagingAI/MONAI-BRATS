@@ -71,7 +71,7 @@ val_ds = DecathlonDataset(
 val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 
 # create model, loss and optimizer
-max_epochs = 300
+max_epochs = 10
 val_interval = 1
 VAL_AMP = True
 
@@ -121,7 +121,7 @@ def inference(input):
 torch.backends.cudnn.benchmark = True
 
 # create training procedure
-trainer = SupervisedTrainer(device=device, max_epochs=1, train_data_loader=train_loader, network=model, optimizer=optimizer, loss_function=loss_function,amp=False)
+trainer = SupervisedTrainer(device=device, max_epochs=max_epochs, train_data_loader=train_loader, network=model, optimizer=optimizer, loss_function=loss_function,amp=False)
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def _print_loss(engine):
