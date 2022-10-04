@@ -2,9 +2,10 @@
 #SBATCH -J BRATS
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
-#SBATCH -c 128                # Cores assigned to each tasks
-#SBATCH --time=0-6:00:00
-#SBATCH -p batch
+#SBATCH -c 7                # Cores assigned to each tasks
+#SBATCH -G 1
+#SBATCH --time=0-8:00:00
+#SBATCH -p gpu
 #SBATCH --qos normal
 
 conda activate MONAI-BRATS
