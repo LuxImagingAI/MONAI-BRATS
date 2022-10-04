@@ -6,3 +6,6 @@
 #SBATCH --time=0-6:00:00
 #SBATCH -p batch
 #SBATCH --qos normal
+
+conda activate MONAI-BRATS
+python brats_train.py
