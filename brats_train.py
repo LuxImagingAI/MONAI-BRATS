@@ -37,10 +37,12 @@ from monai.transforms import (
     EnsureChannelFirstd,
 )
 from monai.utils import set_determinism
-from brats_transforms import *
 import os
 import torch
 import pickle
+
+from transforms import train_transform, val_transform
+from model import inference, model
 
 root_dir = "data"
 output_dir = "output"
@@ -73,20 +75,16 @@ val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 # create model, loss and optimizer
 max_epochs = 10
 val_interval = 1
-VAL_AMP = True
+VAL_AMP = True #TODO setup: model.py
 
 # standard PyTorch program style: create SegResNet, DiceLoss and Adam optimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-model = SegResNet(
-    blocks_down=(1, 2, 2, 4),
-    blocks_up=(1, 1, 1),
-    init_filters=16,
-    in_channels=4,
-    out_channels=3,
-    dropout_prob=0.2,
-).to(device)
+# storing model from model.py on the target device
+model = model.to(device)
+
+# defining loss function and optimizer
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4, weight_decay=1e-5)
 lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
@@ -99,36 +97,11 @@ post_trans = Compose(
     [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
 )
 
-
-# define inference method
-def inference(input):
-
-    def _compute(input):
-        return sliding_window_inference(
-            inputs=input,
-            roi_size=(240, 240, 160),
-            sw_batch_size=1,
-            predictor=model,
-            overlap=0.5,
-        )
-
-    if VAL_AMP:
-        with torch.cuda.amp.autocast():
-            return _compute(input)
-    else:
-        return _compute(input)
-
-
 # enable cuDNN benchmark
 torch.backends.cudnn.benchmark = True
 
 # create training procedure
-trainer = SupervisedTrainer(device=device, max_epochs=max_epochs, train_data_loader=train_loader, network=model, optimizer=optimizer, loss_function=loss_function,amp=False)
-
-@trainer.on(Events.EPOCH_COMPLETED)
-def _print_loss(engine):
-    print(f"Epoch {engine.state.epoch}/{engine.state.max_epochs} loss: {engine.state.output[0]['loss']}", end="")
-    lr_scheduler.step()
+trainer = SupervisedTrainer(device=device, max_epochs=max_epochs, train_data_loader=train_loader, network=model, optimizer=optimizer, loss_function=loss_function, amp=False)
 
 metric_values = []
 metric_values_tc = []
@@ -137,6 +110,8 @@ metric_values_et = []
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def _compute_score(engine):
+    print(f"Epoch {engine.state.epoch}/{engine.state.max_epochs} loss: {engine.state.output[0]['loss']}", end="")
+
     model.eval()
     with torch.no_grad():
 
@@ -169,6 +144,9 @@ def _compute_score(engine):
             f"current mean dice: {metric:.4f}"
             f" tc: {metric_tc:.4f} wt: {metric_wt:.4f} et: {metric_et:.4f}"
         )
+
+        # cosine annealing
+        lr_scheduler.step()
 
 # run the training procedure
 trainer.run()
