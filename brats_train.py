@@ -77,7 +77,7 @@ VAL_AMP = True
 
 # standard PyTorch program style: create SegResNet, DiceLoss and Adam optimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device:{device}")
+print(f"Using device: {device}")
 
 model = SegResNet(
     blocks_down=(1, 2, 2, 4),
@@ -127,9 +127,8 @@ trainer = SupervisedTrainer(device=device, max_epochs=max_epochs, train_data_loa
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def _print_loss(engine):
-    print(f"Epoch {engine.state.epoch}/{engine.state.max_epochs} Loss: {engine.state.output[0]['loss']}")
+    print(f"Epoch {engine.state.epoch}/{engine.state.max_epochs} loss: {engine.state.output[0]['loss']}", end="")
     lr_scheduler.step()
-
 
 metric_values = []
 metric_values_tc = []
@@ -138,7 +137,6 @@ metric_values_et = []
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def _compute_score(engine):
-    epoch = engine.state.epoch
     model.eval()
     with torch.no_grad():
 
@@ -168,7 +166,7 @@ def _compute_score(engine):
         dice_metric_batch.reset()
 
         print(
-            f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
+            f"current mean dice: {metric:.4f}"
             f" tc: {metric_tc:.4f} wt: {metric_wt:.4f} et: {metric_et:.4f}"
         )
 
