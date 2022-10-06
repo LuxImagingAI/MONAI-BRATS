@@ -1,6 +1,7 @@
 from transforms import *
 import torch
 
+VAL_AMP = False
 
 model = SegResNet(
     blocks_down=(1, 2, 2, 4),
@@ -22,8 +23,8 @@ def inference(input):
             overlap=0.5,
         )
 
-    # if VAL_AMP:
-    #     with torch.cuda.amp.autocast():
-    #         return _compute(input)
-    # else:
-    #     return _compute(input)
+    if VAL_AMP:
+        with torch.cuda.amp.autocast():
+            return _compute(input)
+    else:
+        return _compute(input)
