@@ -1,48 +1,23 @@
-import os
-import shutil
-import tempfile
-import time
-import matplotlib.pyplot as plt
 from monai.apps import DecathlonDataset
 from monai.engines import (
-    SupervisedTrainer,
-    SupervisedEvaluator
+    SupervisedTrainer
 )
-from monai.config import print_config
 from monai.data import DataLoader, decollate_batch
-from monai.handlers.utils import from_engine
-from monai.handlers import MetricLogger
 from monai.losses import DiceLoss
-from monai.inferers import sliding_window_inference
 from monai.metrics import DiceMetric
-from monai.networks.nets import SegResNet
 from ignite.engine import Events
 from monai.transforms import (
     Activations,
-    Activationsd,
     AsDiscrete,
-    AsDiscreted,
     Compose,
-    Invertd,
-    LoadImaged,
-    MapTransform,
-    NormalizeIntensityd,
-    Orientationd,
-    RandFlipd,
-    RandScaleIntensityd,
-    RandShiftIntensityd,
-    RandSpatialCropd,
-    Spacingd,
-    EnsureTyped,
-    EnsureChannelFirstd,
 )
 from monai.utils import set_determinism
 import os
 import torch
 import pickle
 
-from transforms import train_transform, val_transform
-from model import inference, model
+from utils.transforms import train_transform, val_transform, post_trans
+from utils.model import inference, model
 
 root_dir = "data"
 output_dir = "output"
@@ -73,7 +48,7 @@ val_ds = DecathlonDataset(
 val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 
 # create model, loss and optimizer
-max_epochs = 10
+max_epochs = 50
 val_interval = 1
 VAL_AMP = True #TODO setup: model.py
 
@@ -93,10 +68,6 @@ lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_e
 dice_metric = DiceMetric(include_background=True, reduction="mean")
 dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 
-post_trans = Compose(
-    [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
-)
-
 # enable cuDNN benchmark
 torch.backends.cudnn.benchmark = True
 
@@ -110,7 +81,7 @@ metric_values_et = []
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def _compute_score(engine):
-    print(f"Epoch {engine.state.epoch}/{engine.state.max_epochs} loss: {engine.state.output[0]['loss']}", end="")
+    print(f"Epoch {engine.state.epoch}/{engine.state.max_epochs} loss: {engine.state.output[0]['loss']}", end=" ")
 
     model.eval()
     with torch.no_grad():
@@ -161,7 +132,7 @@ metric_dict = {
 # save model and metrics
 with open(os.path.join("output","metric.pkl"), "wb") as handle:
     pickle.dump(metric_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-torch.jit.script(model).save(os.path.join(output_dir,"trained_model.zip"))
+torch.jit.script(model).save(os.path.join(output_dir,"model.ts"))
 
 
 
