@@ -102,3 +102,22 @@ val_transform = Compose(
         NormalizeIntensityd(keys="image", nonzero=True, channel_wise=True),
     ]
 )
+
+test_transform = Compose(
+    [
+        #EnsureChannelFirstd(keys="image"),
+        EnsureTyped(keys="image"),
+        #ConvertToMultiChannelBasedOnBratsClassesd(keys="label"),
+        Orientationd(keys="image", axcodes="RAS"),
+        Spacingd(
+            keys="image",
+            pixdim=(1.0, 1.0, 1.0),
+            mode=("bilinear"),
+        ),
+        NormalizeIntensityd(keys="image", nonzero=True, channel_wise=True),
+    ]
+)
+
+post_trans = Compose(
+    [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
+)
