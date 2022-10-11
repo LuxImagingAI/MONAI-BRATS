@@ -72,7 +72,7 @@ dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 torch.backends.cudnn.benchmark = True
 
 # create training procedure
-trainer = SupervisedTrainer(device=device, max_epochs=max_epochs, train_data_loader=train_loader, network=model, optimizer=optimizer, loss_function=loss_function, amp=False)
+trainer = SupervisedTrainer(device=device, max_epochs=max_epochs, train_data_loader=train_loader, network=model, optimizer=optimizer, loss_function=loss_function, inferer=inference, amp=True)
 
 metric_values = []
 metric_values_tc = []
@@ -85,7 +85,6 @@ def _compute_score(engine):
 
     model.eval()
     with torch.no_grad():
-
         for val_data in val_loader:
             val_inputs, val_labels = (
                 val_data["image"].to(device),

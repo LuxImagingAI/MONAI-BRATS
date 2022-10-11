@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from monai.apps import DecathlonDataset
 from monai.config import print_config
 from monai.data import DataLoader, decollate_batch
+from monai.deploy.operators.monai_seg_inference_operator import InMemImageReader
 from monai.handlers.utils import from_engine
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
@@ -28,7 +29,8 @@ from monai.transforms import (
     RandSpatialCropd,
     Spacingd,
     EnsureTyped,
-    EnsureChannelFirstd,
+    EnsureChannelFirstd, EnsureChannelFirst, EnsureType, Orientation, Spacing, NormalizeIntensity, LoadImage, Transform,
+    Lambda,
 )
 from monai.utils import set_determinism
 
@@ -103,18 +105,33 @@ val_transform = Compose(
     ]
 )
 
+def debug_type(img):
+    print(img)
+    return img
+
+class StoredImage(Transform):
+    def __init__(self, image):
+        self.image = image
+
+    def __call__(self, none):
+        return self.image
+
 test_transform = Compose(
     [
-        #EnsureChannelFirstd(keys="image"),
-        EnsureTyped(keys="image"),
+        #LoadImage(),
+        #StoredImage(),
+        Lambda(debug_type),
+        # LoadImageFromMem(),
+        # Lambda(debug_type),
+        EnsureChannelFirst(),
+        EnsureType(),
         #ConvertToMultiChannelBasedOnBratsClassesd(keys="label"),
-        Orientationd(keys="image", axcodes="RAS"),
-        Spacingd(
-            keys="image",
+        Orientation(axcodes="RAS"),
+        Spacing(
             pixdim=(1.0, 1.0, 1.0),
             mode=("bilinear"),
         ),
-        NormalizeIntensityd(keys="image", nonzero=True, channel_wise=True),
+        NormalizeIntensity(nonzero=True, channel_wise=True),
     ]
 )
 
