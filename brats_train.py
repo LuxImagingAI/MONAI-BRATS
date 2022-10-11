@@ -80,7 +80,6 @@ trainer = SupervisedTrainer(
     loss_function=loss_function,
     inferer=inference,
     amp=True,
-    postprocessing=post_trans
 )
 
 metric_values = []
