@@ -123,6 +123,6 @@ post_trans = Compose(
     [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
 )
 
-post_trans = Compose(
+post_trans_test = Compose(
     [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
 )

@@ -14,7 +14,7 @@ from monai.deploy.core import (
 
 from monai.deploy.operators import DICOMDataLoaderOperator, DICOMSeriesToVolumeOperator, \
     DICOMSegmentationWriterOperator, MonaiSegInferenceOperator, InferenceOperator
-from utils.transforms import train_transform, val_transform, post_trans, test_transform, StoredImage
+from utils.transforms import train_transform, val_transform, post_trans, test_transform
 from monai.deploy.core import ExecutionContext, Image, InputContext, IOType, Operator, OutputContext, DataPath
 import monai.deploy.core as md
 from monai.transforms import LoadImaged, LoadImage
