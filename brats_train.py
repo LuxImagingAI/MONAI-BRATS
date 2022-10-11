@@ -72,7 +72,16 @@ dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 torch.backends.cudnn.benchmark = True
 
 # create training procedure
-trainer = SupervisedTrainer(device=device, max_epochs=max_epochs, train_data_loader=train_loader, network=model, optimizer=optimizer, loss_function=loss_function, inferer=inference, amp=True)
+trainer = SupervisedTrainer(
+    device=device,
+    max_epochs=max_epochs,
+    train_data_loader=train_loader,
+    network=model, optimizer=optimizer,
+    loss_function=loss_function,
+    inferer=inference,
+    amp=True,
+    postprocessing=post_trans
+)
 
 metric_values = []
 metric_values_tc = []

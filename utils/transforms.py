@@ -105,27 +105,11 @@ val_transform = Compose(
     ]
 )
 
-def debug_type(img):
-    print(img)
-    return img
-
-class StoredImage(Transform):
-    def __init__(self, image):
-        self.image = image
-
-    def __call__(self, none):
-        return self.image
-
 test_transform = Compose(
     [
-        #LoadImage(),
-        #StoredImage(),
-        Lambda(debug_type),
-        # LoadImageFromMem(),
-        # Lambda(debug_type),
+        LoadImage(image_only=True),
         EnsureChannelFirst(),
         EnsureType(),
-        #ConvertToMultiChannelBasedOnBratsClassesd(keys="label"),
         Orientation(axcodes="RAS"),
         Spacing(
             pixdim=(1.0, 1.0, 1.0),
@@ -133,6 +117,10 @@ test_transform = Compose(
         ),
         NormalizeIntensity(nonzero=True, channel_wise=True),
     ]
+)
+
+post_trans = Compose(
+    [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
 )
 
 post_trans = Compose(

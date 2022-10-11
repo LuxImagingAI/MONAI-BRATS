@@ -18,7 +18,7 @@ from utils.transforms import train_transform, val_transform, post_trans, test_tr
 from monai.deploy.core import ExecutionContext, Image, InputContext, IOType, Operator, OutputContext, DataPath
 import monai.deploy.core as md
 from monai.transforms import LoadImaged, LoadImage
-from utils.operators import MonaiSegInferenceOperatorBRATS
+from utils.operators import MonaiSegInferenceOperatorBRATS, SaveAsNiftiOperator
 
 from monai.deploy.operators.monai_seg_inference_operator import InMemImageReader, Compose
 
@@ -29,12 +29,10 @@ class BratsApp(Application):
     def compose(self):
         #study_loader_op = DICOMDataLoaderOperator()
         #series_to_volume_op = DICOMSeriesToVolumeOperator()
-        seg_inference_op = MonaiSegInferenceOperatorBRATS(roi_size=(240, 240, 160), overlap=0.5, pre_transforms=None, post_transforms=post_trans)
-        seg_writer_op = DICOMSegmentationWriterOperator(["tumor core", "whole tumor", "enhancing tumor"])
-
+        seg_inference_op = MonaiSegInferenceOperatorBRATS(pre_transforms=test_transform, post_transforms=post_trans)
+        save_as_nifti_op = SaveAsNiftiOperator()
         #self.add_flow(study_loader_op, series_to_volume_op)
-        self.add_flow(seg_inference_op, io_map={"image": "image"})
-        self.add_flow(seg_inference_op, seg_writer_op, io_map={"seg_image": "seg_image"})
+        self.add_flow(seg_inference_op, save_as_nifti_op)#, io_map={"seg_image": "seg_image"})
 
 if __name__ == "__main__":
     BratsApp(do_run=True)
