@@ -2,6 +2,8 @@ import os
 import shutil
 import tempfile
 import time
+from typing import Any
+
 import matplotlib.pyplot as plt
 from monai.apps import DecathlonDataset
 from monai.config import print_config
@@ -30,7 +32,7 @@ from monai.transforms import (
     Spacingd,
     EnsureTyped,
     EnsureChannelFirstd, EnsureChannelFirst, EnsureType, Orientation, Spacing, NormalizeIntensity, LoadImage, Transform,
-    Lambda,
+    Lambda, AsChannelLast, SqueezeDim, SaveImage,
 )
 from monai.utils import set_determinism
 
@@ -45,9 +47,7 @@ class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
     label 3 is the necrotic and non-enhancing tumor core
     The possible classes are TC (Tumor core), WT (Whole tumor)
     and ET (Enhancing tumor).
-
     """
-
     def __call__(self, data):
         d = dict(data)
         for key in self.keys:
@@ -64,6 +64,11 @@ class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
             result.append(d[key] == 2)
             d[key] = torch.stack(result, axis=0).float()
         return d
+
+class ConvertToBratsClassesBasesOnMultiChannel(Transform):
+
+    def __call__(self, data: Any):
+        pass
 
 
 train_transform = Compose(
@@ -120,9 +125,14 @@ test_transform = Compose(
 )
 
 post_trans = Compose(
-    [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
+    [Activationsd(keys="image", sigmoid=True), AsDiscreted(keys="image", threshold=0.5)]
 )
 
 post_trans_test = Compose(
-    [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
+    [Activations(sigmoid=True),
+     AsDiscrete(threshold=0.5),
+     SqueezeDim(dim=0),
+     AsChannelLast(channel_dim=0),
+     # SaveImage(output_dir="output", squeeze_end_dims=True, output_postfix="seg", channel_dim=3)
+     ]
 )

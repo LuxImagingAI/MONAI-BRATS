@@ -15,4 +15,5 @@ conda activate MONAI-BRATS
 
 nvidia-smi
 python brats_train.py
-
+monai-deploy package brats_deploy.py --tag brats_app --output-dir "" --model "model/model.ts"
+docker save brats_app > brats_app.tar
