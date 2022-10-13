@@ -7,7 +7,7 @@
 #SBATCH --time=0-30:00:00
 #SBATCH -p gpu
 #SBATCH --qos normal
-#SBATCH --array=0-3
+#SBATCH --array=0-4
 
 epochs=100
 
