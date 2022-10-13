@@ -119,6 +119,8 @@ def _compute_score(engine):
                 val_data["label"].to(device),
             )
             val_outputs = inference(val_inputs, network=model)
+            print(f"outputs:\n{val_outputs}")
+            print(f"shape:\n{val_outputs.shape}")
             val_outputs = [post_trans(i) for i in decollate_batch(val_outputs)]
             dice_metric(y_pred=val_outputs, y=val_labels)
             dice_metric_batch(y_pred=val_outputs, y=val_labels)
