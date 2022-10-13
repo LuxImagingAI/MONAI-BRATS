@@ -38,7 +38,8 @@ set_determinism(seed=0)
 
 
 # here we don't cache any data in case out of memory issue
-train_folds = [(n if n is not fold else "") for n in range(nfolds)]
+train_folds = [n for n in range(nfolds) if n != fold]
+print(f"Train_folds: {train_folds}")
 train_ds = CrossValidation(
     root_dir=root_dir,
     nfolds=nfolds,
@@ -53,7 +54,7 @@ print(f"Train dataloader with folds {train_folds} created")
 
 val_ds = CrossValidation(
     root_dir=root_dir,
-    nfolds=4,
+    nfolds=nfolds,
     dataset_cls=DecathlonDataset,
     task="Task01_BrainTumour",
     section="validation",
