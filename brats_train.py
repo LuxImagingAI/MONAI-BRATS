@@ -69,7 +69,7 @@ print(f"Validation dataloader with fold {fold} created")
 
 # create model, loss and optimizer
 val_interval = 1
-VAL_AMP = True #TODO setup: model.py
+amp = True #TODO setup: model.py
 
 # standard PyTorch program style: create SegResNet, DiceLoss and Adam optimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -99,7 +99,7 @@ trainer = SupervisedTrainer(
     optimizer=optimizer,
     loss_function=loss_function,
     inferer=inference,
-    amp=False,
+    amp=amp,
 )
 
 metric_values = []
