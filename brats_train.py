@@ -47,8 +47,9 @@ train_ds = CrossValidation(
     dataset_cls=DecathlonDataset,
     task="Task01_BrainTumour",
     section="training",
-    transform=val_transform,
+    transform=train_transform,
     download=True,
+    cache_rate=0.0
 ).get_dataset(folds=train_folds)
 train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=4)
 print(f"Train dataloader with folds {train_folds} created")
@@ -61,7 +62,9 @@ val_ds = CrossValidation(
     section="validation",
     transform=val_transform,
     download=False,
+    cache_rate=0.0
 ).get_dataset(folds=fold)
+val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 print(f"Validation dataloader with fold {fold} created")
 
 # create model, loss and optimizer
@@ -87,15 +90,13 @@ torch.backends.cudnn.benchmark = True
 # storing model from model.py on the target device
 model = model.to(device)
 
-trainer_arr = []
-val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
-
 # create training procedure
 trainer = SupervisedTrainer(
     device=device,
     max_epochs=epochs,
     train_data_loader=train_loader,
-    network=model, optimizer=optimizer,
+    network=model,
+    optimizer=optimizer,
     loss_function=loss_function,
     inferer=inference,
     amp=False,
