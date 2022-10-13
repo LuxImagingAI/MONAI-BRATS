@@ -17,4 +17,4 @@ sleep 2s
 conda activate MONAI-BRATS
 
 nvidia-smi
-python brats_train.py --nfolds ${SLURM_ARRAY_TASK_ID} --fold ${SLURM_ARRAY_TASK_COUNT} --epochs $epochs
+python brats_train.py --nfolds ${SLURM_ARRAY_TASK_COUNT} --fold ${SLURM_ARRAY_TASK_ID} --epochs $epochs
