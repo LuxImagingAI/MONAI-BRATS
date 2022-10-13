@@ -32,7 +32,7 @@ from monai.transforms import (
     Spacingd,
     EnsureTyped,
     EnsureChannelFirstd, EnsureChannelFirst, EnsureType, Orientation, Spacing, NormalizeIntensity, LoadImage, Transform,
-    Lambda, AsChannelLast, SqueezeDim, SaveImage,
+    Lambda, AsChannelLast, SqueezeDim, SaveImage, SqueezeDimd, AsChannelLastd,
 )
 from monai.utils import set_determinism
 
@@ -125,14 +125,9 @@ test_transform = Compose(
 )
 
 post_trans = Compose(
-    [Activationsd(keys="image", sigmoid=True), AsDiscreted(keys="image", threshold=0.5)]
+    [
+        Activations(sigmoid=True),
+        AsDiscrete(threshold=0.5)
+    ]
 )
 
-post_trans_test = Compose(
-    [Activations(sigmoid=True),
-     AsDiscrete(threshold=0.5),
-     SqueezeDim(dim=0),
-     AsChannelLast(channel_dim=0),
-     # SaveImage(output_dir="output", squeeze_end_dims=True, output_postfix="seg", channel_dim=3)
-     ]
-)
