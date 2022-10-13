@@ -32,14 +32,15 @@ epochs = args.epochs
 
 root_dir = "data"
 output_dir = "output"
+model_dir = "model"
 os.makedirs(root_dir, exist_ok=True)
 os.makedirs(output_dir, exist_ok=True)
+os.makedirs(model_dir, exist_ok=True)
 set_determinism(seed=0)
 
 
 # here we don't cache any data in case out of memory issue
 train_folds = [n for n in range(nfolds) if n != fold]
-print(f"Train_folds: {train_folds}")
 train_ds = CrossValidation(
     root_dir=root_dir,
     nfolds=nfolds,
@@ -59,7 +60,7 @@ val_ds = CrossValidation(
     task="Task01_BrainTumour",
     section="validation",
     transform=val_transform,
-    download=True,
+    download=False,
 ).get_dataset(folds=fold)
 print(f"Validation dataloader with fold {fold} created")
 
@@ -157,7 +158,7 @@ metric_dict = {
 # save model and metrics
 with open(os.path.join("output",f"metric_fold_{fold}.pkl"), "wb") as handle:
     pickle.dump(metric_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-torch.jit.script(model).save(os.path.join(output_dir,f"model_fold_{fold}.ts"))
+torch.jit.script(model).save(os.path.join(model_dir,f"model_fold_{fold}.ts"))
 
 
 
