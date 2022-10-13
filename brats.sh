@@ -7,6 +7,9 @@
 #SBATCH --time=0-8:00:00
 #SBATCH -p gpu
 #SBATCH --qos normal
+#SBATCH --array=0-3
+
+epochs=10
 
 #module load lang/Anaconda3/2020.11
 module load system/CUDA
@@ -14,6 +17,4 @@ sleep 2s
 conda activate MONAI-BRATS
 
 nvidia-smi
-python brats_train.py
-monai-deploy package brats_deploy.py --tag brats_app --output-dir "" --model "model/model.ts"
-docker save brats_app > brats_app.tar
+python brats_train.py --nfolds ${SLURM_ARRAY_TASK_ID} --fold ${SLURM_ARRAY_TASK_COUNT} --epochs $epochs

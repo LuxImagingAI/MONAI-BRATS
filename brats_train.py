@@ -1,4 +1,4 @@
-from monai.apps import DecathlonDataset
+from monai.apps import DecathlonDataset, CrossValidation
 from monai.engines import (
     SupervisedTrainer
 )
@@ -15,9 +15,20 @@ from monai.utils import set_determinism
 import os
 import torch
 import pickle
+import argparse
 
 from utils.transforms import train_transform, val_transform, post_trans
 from utils.model import inference, model
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--nfolds', action="store", type=int, dest="nfolds", help="Define the number of folds for cross-validation")
+parser.add_argument('--fold', action="store", type=int, dest="fold", help="Define the fold used vor validation")
+parser.add_argument('--epochs', action="store", type=int, dest="epochs", help="Define the number of epochs for training")
+args = parser.parse_args()
+
+nfolds = args.nfolds
+fold = args.fold
+epochs = args.epochs
 
 root_dir = "data"
 output_dir = "output"
@@ -25,30 +36,33 @@ os.makedirs(root_dir, exist_ok=True)
 os.makedirs(output_dir, exist_ok=True)
 set_determinism(seed=0)
 
+
 # here we don't cache any data in case out of memory issue
-train_ds = DecathlonDataset(
+train_folds = [(n if n is not fold else "") for n in range(nfolds)]
+train_ds = CrossValidation(
     root_dir=root_dir,
+    nfolds=nfolds,
+    dataset_cls=DecathlonDataset,
     task="Task01_BrainTumour",
-    transform=train_transform,
     section="training",
-    download=True,
-    cache_rate=0.0,
-    num_workers=4,
-)
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=4)
-val_ds = DecathlonDataset(
-    root_dir=root_dir,
-    task="Task01_BrainTumour",
     transform=val_transform,
+    download=True,
+).get_dataset(folds=train_folds)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=4)
+print(f"Train dataloader with folds {train_folds} created")
+
+val_ds = CrossValidation(
+    root_dir=root_dir,
+    nfolds=4,
+    dataset_cls=DecathlonDataset,
+    task="Task01_BrainTumour",
     section="validation",
-    download=False,
-    cache_rate=0.0,
-    num_workers=4,
-)
-val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
+    transform=val_transform,
+    download=True,
+).get_dataset(folds=fold)
+print(f"Validation dataloader with fold {fold} created")
 
 # create model, loss and optimizer
-max_epochs = 50
 val_interval = 1
 VAL_AMP = True #TODO setup: model.py
 
@@ -56,13 +70,10 @@ VAL_AMP = True #TODO setup: model.py
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-# storing model from model.py on the target device
-model = model.to(device)
-
 # defining loss function and optimizer
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4, weight_decay=1e-5)
-lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
+lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
 # create handlers for training procedure
 dice_metric = DiceMetric(include_background=True, reduction="mean")
@@ -71,10 +82,16 @@ dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 # enable cuDNN benchmark
 torch.backends.cudnn.benchmark = True
 
+# storing model from model.py on the target device
+# model = model.to(device) //TODO probably done in supervised trainer function
+
+trainer_arr = []
+val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
+
 # create training procedure
 trainer = SupervisedTrainer(
     device=device,
-    max_epochs=max_epochs,
+    max_epochs=epochs,
     train_data_loader=train_loader,
     network=model, optimizer=optimizer,
     loss_function=loss_function,
@@ -137,9 +154,9 @@ metric_dict = {
 }
 
 # save model and metrics
-with open(os.path.join("output","metric.pkl"), "wb") as handle:
+with open(os.path.join("output",f"metric_fold_{fold}.pkl"), "wb") as handle:
     pickle.dump(metric_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-torch.jit.script(model).save(os.path.join(output_dir,"model.ts"))
+torch.jit.script(model).save(os.path.join(output_dir,f"model_fold_{fold}.ts"))
 
 
 
