@@ -85,7 +85,7 @@ dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 torch.backends.cudnn.benchmark = True
 
 # storing model from model.py on the target device
-# model = model.to(device) //TODO probably done in supervised trainer function
+model = model.to(device)
 
 trainer_arr = []
 val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
