@@ -98,7 +98,7 @@ trainer = SupervisedTrainer(
     network=model, optimizer=optimizer,
     loss_function=loss_function,
     inferer=inference,
-    amp=True,
+    amp=False,
 )
 
 metric_values = []
