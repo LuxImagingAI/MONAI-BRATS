@@ -46,30 +46,23 @@ set_determinism(seed=0)
 
 
 # here we don't cache any data in case out of memory issue
-train_folds = [n for n in range(nfolds) if n != fold]
-train_ds = CrossValidation(
+cv_ds = CrossValidation(
     root_dir=root_dir,
     nfolds=nfolds,
     dataset_cls=DecathlonDataset,
     task="Task01_BrainTumour",
     section="training",
-    transform=train_transform,
+    #transform=train_transform,
     download=True,
     cache_rate=0.0
-).get_dataset(folds=train_folds)
+)
+train_folds = [n for n in range(nfolds) if n != fold]
+train_ds = cv_ds.get_dataset(folds=train_folds, transform=train_transform)
+val_ds = cv_ds.get_dataset(folds=fold, transform=val_transform)
+
 train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=4)
 print(f"Train dataloader with folds {train_folds} created")
 
-val_ds = CrossValidation(
-    root_dir=root_dir,
-    nfolds=nfolds,
-    dataset_cls=DecathlonDataset,
-    task="Task01_BrainTumour",
-    section="validation",
-    transform=val_transform,
-    download=False,
-    cache_rate=0.0
-).get_dataset(folds=fold)
 val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 print(f"Validation dataloader with fold {fold} created")
 
