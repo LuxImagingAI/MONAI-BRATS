@@ -85,18 +85,21 @@ model = model.to(device)
 # enable cuDNN benchmark
 torch.backends.cudnn.benchmark = True
 
+weight_decay = 1e-5
 # defining loss function and optimizer
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
-optimizer = torch.optim.Adam(model.parameters(), 1e-4, weight_decay=1e-5)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=weight_decay)
 #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
 # create handlers for training procedure
 dice_metric = DiceMetric(include_background=True, reduction="mean")
 dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 
+# Learning Rate Finder
 lr_finder = LearningRateFinder(model=model, optimizer=optimizer, criterion=loss_function, device=device)
 lr_finder.range_test(train_loader=train_loader, start_lr=1e-4, end_lr=1, num_iter=20)
-#lr, _ = lr_finder.get_steepest_gradient() //TODO check
+lr, _ = lr_finder.get_steepest_gradient()
+optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
 # create training procedure
 trainer = SupervisedTrainer(
