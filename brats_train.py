@@ -6,6 +6,7 @@ from monai.data import DataLoader, decollate_batch
 from monai.losses import DiceLoss
 from monai.metrics import DiceMetric
 from ignite.engine import Events
+from monai.optimizers import LearningRateFinder
 from monai.transforms import (
     Activations,
     AsDiscrete,
@@ -32,7 +33,7 @@ epochs = args.epochs
 
 root_dir = "data"
 output_dir = "output"
-model_dir = os.path.join(output_dir,"models")
+model_dir = os.path.join(output_dir, "output/models")
 metrics_dir = os.path.join(output_dir, "metrics")
 
 os.makedirs(root_dir, exist_ok=True)
@@ -70,17 +71,24 @@ val_ds = CrossValidation(
 val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 print(f"Validation dataloader with fold {fold} created")
 
-# create model, loss and optimizer
+# create models, loss and optimizer
 val_interval = 1
-amp = True #TODO setup: model.py
+amp = True #TODO setup: models.py
 
 # standard PyTorch program style: create SegResNet, DiceLoss and Adam optimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
+# storing models from models.py on the target device
+model = model.to(device)
 
 # defining loss function and optimizer
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4, weight_decay=1e-5)
+lr_finder = LearningRateFinder(model=model, optimizer=optimizer, criterion=loss_function, device=device)
+lr_finder.range_test(train_loader=train_loader, val_loader=val_loader, start_lr=1e-4, end_lr=1, num_iter=20)
+#lr, _ = lr_finder.get_steepest_gradient() //TODO check
+
+
 #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
 # create handlers for training procedure
@@ -90,8 +98,6 @@ dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 # enable cuDNN benchmark
 torch.backends.cudnn.benchmark = True
 
-# storing model from model.py on the target device
-model = model.to(device)
 
 # create training procedure
 trainer = SupervisedTrainer(
@@ -161,7 +167,7 @@ metric_dict = {
     "metric_values_et": metric_values_et
 }
 
-# save model and metrics
+# save models and metrics
 with open(os.path.join(metrics_dir, f"metric_fold_{fold}.pkl"), "wb") as handle:
     pickle.dump(metric_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 torch.jit.script(model).save(os.path.join(model_dir,f"model_fold_{fold}.ts"))

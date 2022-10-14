@@ -10,7 +10,7 @@ from monai.deploy.core import (
     Operator,
     OutputContext,
 )
-# copy model: scp rmaser@iris-cluster:MONAI-BRATS/output/model.ts . TODO
+# copy models: scp rmaser@iris-cluster:MONAI-BRATS/output/models.ts . TODO
 
 from monai.deploy.operators import DICOMDataLoaderOperator, DICOMSeriesToVolumeOperator, \
     DICOMSegmentationWriterOperator, MonaiSegInferenceOperator, InferenceOperator

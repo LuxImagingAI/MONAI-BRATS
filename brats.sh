@@ -9,7 +9,7 @@
 #SBATCH --qos normal
 #SBATCH --array=0-4
 
-epochs=100
+epochs=20
 
 #module load lang/Anaconda3/2020.11
 module load system/CUDA
@@ -18,5 +18,5 @@ conda activate MONAI-BRATS
 
 nvidia-smi
 python brats_train.py --nfolds ${SLURM_ARRAY_TASK_COUNT} --fold ${SLURM_ARRAY_TASK_ID} --epochs $epochs
-#python brats_deploy.py --input "data/Task01_BrainTumour/imagesTs" --output "output" --model "model"
+#python brats_deploy.py --input "data/Task01_BrainTumour/imagesTs" --output "output" --models "models"
 

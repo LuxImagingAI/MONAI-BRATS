@@ -94,10 +94,9 @@ class ConvertToBratsClassesBasedOnMultiChannel(Transform):
 
         # merge the segmentations in one image
         output = torch.add(output_dict["label1"], torch.add(output_dict["label2"], output_dict["label3"]))
-        #output = torch.unsqueeze(output, dim=0)
+        assert(torch.any(output>3))
         data.set_array(output)
         new_data = monai.data.MetaTensor(output, meta=data.meta)
-        print(new_data.shape)
         return new_data
 
 

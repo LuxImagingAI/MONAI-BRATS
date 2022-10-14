@@ -76,18 +76,13 @@ class MonaiSegInferenceOperatorBRATS(InferenceOperator):
 
         self.labels = []
 
-        @evaluator.on(Events.EPOCH_COMPLETED)
+        @evaluator.on(Events.ITERATION_COMPLETED)
         def _save_output(engine):
-            self.labels = engine.state.output
+            self.labels.append(engine.state.output[0])
 
         evaluator.run()
 
-        output = {
-            "names": image_file_names,
-            "labels": self.labels,
-        }
-
-        op_output.set(Image(output), label="seg_image")
+        op_output.set(Image(self.labels), label="seg_image")
         print(f"Ensemble segmentation finished in {round(time.time()-t,2)}s")
 
 
@@ -106,8 +101,7 @@ class SaveAsNiftiOperator(Operator):
         self.working_directory = os.getcwd()
 
     def compute(self, op_input: InputContext, op_output: OutputContext, context: ExecutionContext):
-        images = op_input.get("seg_image").asnumpy()
+        labels = op_input.get("seg_image").asnumpy()
 
-        for i in range(0, len(images["names"])):
-            label = images["labels"][i]
-            SaveImage(output_dir=os.path.join(self.working_directory, "output"), separate_folder=False, output_postfix="label", scale=255)(label)
+        for label in labels:
+            SaveImage(output_dir=os.path.join(self.working_directory, "output/labels"), separate_folder=False, output_postfix="label", scale=255)(label)
