@@ -98,7 +98,7 @@ dice_metric = DiceMetric(include_background=True, reduction="mean")
 dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 
 # Learning Rate Finder
-lr_finder = LearningRateFinder(model=deepcopy(model), optimizer=deepcopy(optimizer), criterion=deepcopy(loss_function), device=device)
+lr_finder = LearningRateFinder(model=model, optimizer=optimizer, criterion=deepcopy(loss_function), device=device)
 lr_finder.range_test(train_loader=deepcopy(train_loader), start_lr=1e-4, end_lr=1, num_iter=100)
 lr, _ = lr_finder.get_steepest_gradient()
 print(f"Optimal learning rate found: lr=", lr)
