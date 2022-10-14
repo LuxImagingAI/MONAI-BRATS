@@ -49,7 +49,7 @@ train_ds = CrossValidation(
     section="training",
     transform=train_transform,
     download=True,
-    cache_rate=0.0
+    cache_rate=1.0
 ).get_dataset(folds=train_folds)
 train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=4)
 print(f"Train dataloader with folds {train_folds} created")
@@ -62,7 +62,7 @@ val_ds = CrossValidation(
     section="validation",
     transform=val_transform,
     download=False,
-    cache_rate=0.0
+    cache_rate=1.0
 ).get_dataset(folds=fold)
 val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 print(f"Validation dataloader with fold {fold} created")
@@ -78,7 +78,7 @@ print(f"Using device: {device}")
 # defining loss function and optimizer
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4, weight_decay=1e-5)
-lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+#lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
 # create handlers for training procedure
 dice_metric = DiceMetric(include_background=True, reduction="mean")
@@ -146,7 +146,7 @@ def _compute_score(engine):
         )
 
         # cosine annealing
-        lr_scheduler.step()
+        #lr_scheduler.step()
 
 # run the training procedure
 trainer.run()

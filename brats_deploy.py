@@ -32,7 +32,7 @@ class BratsApp(Application):
         seg_inference_op = MonaiSegInferenceOperatorBRATS(pre_transforms=test_transform, post_transforms=post_trans)
         save_as_nifti_op = SaveAsNiftiOperator()
         #self.add_flow(study_loader_op, series_to_volume_op)
-        self.add_flow(seg_inference_op, save_as_nifti_op, io_map={"seg_image": "seg_image", "path": "path"})
+        self.add_flow(seg_inference_op, save_as_nifti_op, io_map={"seg_image": "seg_image"})
 
 if __name__ == "__main__":
     BratsApp(do_run=True)
