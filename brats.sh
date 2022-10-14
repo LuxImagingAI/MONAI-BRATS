@@ -9,7 +9,7 @@
 #SBATCH --qos normal
 #SBATCH --array=0-4
 
-epochs=20
+epochs=50
 
 #module load lang/Anaconda3/2020.11
 module load system/CUDA
