@@ -34,7 +34,7 @@ epochs = args.epochs
 root_dir = "data"
 output_dir = "output"
 model_dir = os.path.join(output_dir, "output/models")
-metrics_dir = os.path.join(output_dir, "metrics")
+metrics_dir = os.path.join(output_dir, "output/metrics")
 
 os.makedirs(root_dir, exist_ok=True)
 os.makedirs(output_dir, exist_ok=True)
@@ -53,7 +53,7 @@ train_ds = CrossValidation(
     section="training",
     transform=train_transform,
     download=True,
-    cache_rate=1.0
+    cache_rate=0.0
 ).get_dataset(folds=train_folds)
 train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=4)
 print(f"Train dataloader with folds {train_folds} created")
@@ -66,7 +66,7 @@ val_ds = CrossValidation(
     section="validation",
     transform=val_transform,
     download=False,
-    cache_rate=1.0
+    cache_rate=0.0
 ).get_dataset(folds=fold)
 val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 print(f"Validation dataloader with fold {fold} created")
@@ -78,26 +78,25 @@ amp = True #TODO setup: models.py
 # standard PyTorch program style: create SegResNet, DiceLoss and Adam optimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
+
 # storing models from models.py on the target device
 model = model.to(device)
+
+# enable cuDNN benchmark
+torch.backends.cudnn.benchmark = True
 
 # defining loss function and optimizer
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
 optimizer = torch.optim.Adam(model.parameters(), 1e-4, weight_decay=1e-5)
-lr_finder = LearningRateFinder(model=model, optimizer=optimizer, criterion=loss_function, device=device)
-lr_finder.range_test(train_loader=train_loader, val_loader=val_loader, start_lr=1e-4, end_lr=1, num_iter=20)
-#lr, _ = lr_finder.get_steepest_gradient() //TODO check
-
-
 #lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
 # create handlers for training procedure
 dice_metric = DiceMetric(include_background=True, reduction="mean")
 dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 
-# enable cuDNN benchmark
-torch.backends.cudnn.benchmark = True
-
+lr_finder = LearningRateFinder(model=model, optimizer=optimizer, criterion=loss_function, device=device)
+lr_finder.range_test(train_loader=train_loader, start_lr=1e-4, end_lr=1, num_iter=20)
+#lr, _ = lr_finder.get_steepest_gradient() //TODO check
 
 # create training procedure
 trainer = SupervisedTrainer(
