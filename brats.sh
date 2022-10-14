@@ -18,5 +18,5 @@ conda activate MONAI-BRATS
 
 nvidia-smi
 python brats_train.py --nfolds ${SLURM_ARRAY_TASK_COUNT} --fold ${SLURM_ARRAY_TASK_ID} --epochs $epochs
-python brats_deploy.py --input "data/Task01_BrainTumour/imagesTs" --output "output" --model "model"
+#python brats_deploy.py --input "data/Task01_BrainTumour/imagesTs" --output "output" --model "model"
 

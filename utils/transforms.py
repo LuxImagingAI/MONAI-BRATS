@@ -5,6 +5,7 @@ import time
 from typing import Any
 
 import matplotlib.pyplot as plt
+import monai.data
 from monai.apps import DecathlonDataset
 from monai.config import print_config
 from monai.data import DataLoader, decollate_batch
@@ -65,10 +66,39 @@ class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
             d[key] = torch.stack(result, axis=0).float()
         return d
 
-class ConvertToBratsClassesBasesOnMultiChannel(Transform):
+class ConvertToBratsClassesBasedOnMultiChannel(Transform):
 
     def __call__(self, data: Any):
-        pass
+        # order in data is: TC->WT->ET
+        input_dict = {
+            "TC": data[0],
+            "WT": data[1],
+            "ET": data[2]
+        }
+
+        output_dict = {}
+
+        # ET is label 2
+        output_dict["label2"] = input_dict["ET"]
+
+        # label 3 is "TC and not label2" <=> "TC and not ET"
+        output_dict["label3"] = torch.logical_or(input_dict["TC"], input_dict["ET"] != 1)
+
+        # label 1 is "WT and not label 2 and not label 3"
+        output_dict["label1"] = torch.logical_or(input_dict["WT"], torch.logical_or(output_dict["label2"] != 1, output_dict["label3"] != 1))
+
+        # set values of different labels
+        output_dict["label2"] = torch.mul(output_dict["label1"], 1)
+        output_dict["label2"] = torch.mul(output_dict["label2"], 2)
+        output_dict["label3"] = torch.mul(output_dict["label3"], 3)
+
+        # merge the segmentations in one image
+        output = torch.add(output_dict["label1"], torch.add(output_dict["label2"], output_dict["label3"]))
+        #output = torch.unsqueeze(output, dim=0)
+        data.set_array(output)
+        new_data = monai.data.MetaTensor(output, meta=data.meta)
+        print(new_data.shape)
+        return new_data
 
 
 train_transform = Compose(

@@ -32,10 +32,13 @@ epochs = args.epochs
 
 root_dir = "data"
 output_dir = "output"
-model_dir = "model"
+model_dir = os.path.join(output_dir,"models")
+metrics_dir = os.path.join(output_dir, "metrics")
+
 os.makedirs(root_dir, exist_ok=True)
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(model_dir, exist_ok=True)
+os.makedirs(metrics_dir, exist_ok=True)
 set_determinism(seed=0)
 
 
@@ -159,7 +162,7 @@ metric_dict = {
 }
 
 # save model and metrics
-with open(os.path.join("output",f"metric_fold_{fold}.pkl"), "wb") as handle:
+with open(os.path.join(metrics_dir, f"metric_fold_{fold}.pkl"), "wb") as handle:
     pickle.dump(metric_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 torch.jit.script(model).save(os.path.join(model_dir,f"model_fold_{fold}.ts"))
 
