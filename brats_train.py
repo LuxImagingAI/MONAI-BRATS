@@ -99,6 +99,7 @@ dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 lr_finder = LearningRateFinder(model=model, optimizer=optimizer, criterion=loss_function, device=device)
 lr_finder.range_test(train_loader=train_loader, start_lr=1e-4, end_lr=1, num_iter=100)
 lr, _ = lr_finder.get_steepest_gradient()
+print(f"Optimal learning rate found: lr=", lr)
 optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
 # create training procedure
