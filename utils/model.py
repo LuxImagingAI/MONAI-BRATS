@@ -1,5 +1,4 @@
-import torch
-from monai.inferers import sliding_window_inference, SlidingWindowInferer
+from monai.inferers import SlidingWindowInferer
 from monai.networks.nets import SegResNet
 
 VAL_AMP = False
