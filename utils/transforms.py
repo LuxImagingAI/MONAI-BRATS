@@ -1,5 +1,3 @@
-from typing import Any
-import monai.data
 from monai.transforms import (
     Activations,
     AsDiscrete,
