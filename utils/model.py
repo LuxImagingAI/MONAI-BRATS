@@ -1,8 +1,6 @@
 from monai.inferers import SlidingWindowInferer
 from monai.networks.nets import SegResNet
 
-VAL_AMP = False
-
 model = SegResNet(
     blocks_down=(1, 2, 2, 4),
     blocks_up=(1, 1, 1),

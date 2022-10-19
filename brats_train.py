@@ -67,7 +67,7 @@ print(f"Train dataloader with folds {train_folds} created")
 val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 print(f"Validation dataloader with fold {fold} created")
 
-# Standard PyTorch program style: create SegResNet, DiceLoss and Adam optimizer
+# Check if CUDA is available and set device accordingly
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
