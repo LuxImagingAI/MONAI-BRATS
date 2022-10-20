@@ -6,6 +6,7 @@ import torch.cuda
 from ignite.engine import Events
 from monai.data import Dataset, DataLoader
 from monai.deploy.core import DataPath, IOType, Image, InputContext, OutputContext, ExecutionContext, Operator
+from monai.deploy.exceptions import IOMappingError
 from monai.deploy.operators import InferenceOperator
 from typing import Any, Dict, Tuple, Union, Collection, Optional
 import monai.deploy.core as md
@@ -20,8 +21,16 @@ class Models(md.domain.Domain):
         super().__init__(metadata=metadata)
         self._models: Union[Collection[nn.Module], nn.Module] = models
         self._read_only: bool = read_only
-    def get(self):
+
+    @property
+    def models(self):
         return self._models
+
+    @models.setter
+    def models(self, val):
+        if self._read_only:
+            raise IOMappingError("This DataPath is read-only.")
+        self._models = val
 
 class ImagePaths(md.domain.Domain):
     def __init__(self, image_paths: Union[str, Path, Collection[str], Collection[Path]], read_only: bool = False, metadata: Optional[Dict] = None):
@@ -29,12 +38,19 @@ class ImagePaths(md.domain.Domain):
         self._image_paths: Union[str, Path, Collection[str], Collection[Path]] = image_paths
         self._read_only: bool = read_only
 
-    def get(self):
+    @property
+    def paths(self):
         return self._image_paths
+
+    @paths.setter
+    def paths(self, val):
+        if self._read_only:
+            raise IOMappingError("This DataPath is read-only.")
+        self._image_paths = val
 
 @md.input("image", DataPath, IOType.DISK)
 @md.output("image", ImagePaths, IOType.DISK)
-class GetImagePaths(Operator):
+class GetImagePathsOperator(Operator):
 
     def compute(self, op_input: InputContext, op_output: OutputContext, context: ExecutionContext):
         # Get image path from context and check validity
@@ -51,7 +67,7 @@ class GetImagePaths(Operator):
 
 
 @md.output("model", Models, IOType.DISK)
-class GetModels(Operator):
+class GetModelsOperator(Operator):
 
     def compute(self, op_input: InputContext, op_output: OutputContext, context: ExecutionContext):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -79,7 +95,7 @@ class GetModels(Operator):
 @md.input("image", ImagePaths, IOType.DISK)
 @md.input("model", Models, IOType.IN_MEMORY)
 @md.output("seg_image", Image, IOType.IN_MEMORY)
-class MonaiSegInferenceOperatorBRATS(Operator):
+class MonaiSegInferenceBRATSOperator(Operator):
     # Takes model path and image path as input, loads the models and files into memory and performs segmentation
 
     def __init__(self, pre_transforms=None, post_transforms=None):
@@ -92,9 +108,8 @@ class MonaiSegInferenceOperatorBRATS(Operator):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # Get data from input
-        image_file_paths = op_input.get("image").get()
-        models = op_input.get("model").get()
-        print(image_file_paths)
+        image_file_paths = op_input.get("image").paths
+        models = op_input.get("model").models
 
         # Create dataset and dataloader
         dataset = Dataset(data=image_file_paths, transform=self.pre_transforms)
