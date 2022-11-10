@@ -5,6 +5,7 @@
 #SBATCH -p gpu              # Job-type, can be batch (only CPU) or gpu
 #SBATCH -G 1                # Number of GPUs for the job
 #SBATCH --time=0-4:00:00   # Time limit
+#SBATCH --qos normal
 
 module load lang/Anaconda3/2020.11
 module load system/CUDA

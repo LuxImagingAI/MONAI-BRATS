@@ -6,6 +6,7 @@
 #SBATCH -G 1                # Number of GPUs for the job
 #SBATCH --time=0-16:00:00   # Time limit
 #SBATCH --array=0-4         # Definition of job array
+#SBATCH --qos normal
 
 epochs=50
 
