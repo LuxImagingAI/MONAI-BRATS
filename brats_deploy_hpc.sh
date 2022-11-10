@@ -7,7 +7,6 @@
 #SBATCH --time=0-4:00:00   # Time limit
 #SBATCH --qos normal
 
-module load lang/Anaconda3/2020.11
 module load system/CUDA
 sleep 2s
 conda activate MONAI-BRATS

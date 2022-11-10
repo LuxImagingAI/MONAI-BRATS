@@ -10,7 +10,6 @@
 
 epochs=50
 
-module load lang/Anaconda3/2020.11
 module load system/CUDA
 sleep 2s
 conda activate MONAI-BRATS
