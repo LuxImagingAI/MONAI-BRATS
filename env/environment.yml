@@ -16,15 +16,16 @@ dependencies:
   - beautifulsoup4=4.11.1=py310h06a4308_0
   - blas=1.0=mkl
   - bleach=4.1.0=pyhd3eb1b0_0
+  - bottleneck=1.3.5=py310ha9d4c09_0
   - brotli=1.0.9=h5eee18b_7
   - brotli-bin=1.0.9=h5eee18b_7
   - brotlipy=0.7.0=py310h7f8727e_1002
   - bzip2=1.0.8=h7b6447c_0
   - c-ares=1.18.1=h7f98852_0
-  - ca-certificates=2022.9.24=ha878542_0
+  - ca-certificates=2022.10.11=h06a4308_0
   - cached-property=1.5.2=hd8ed1ab_1
   - cached_property=1.5.2=pyha770c72_1
-  - certifi=2022.9.24=pyhd8ed1ab_0
+  - certifi=2022.9.24=py310h06a4308_0
   - cffi=1.15.1=py310h74dc2b5_0
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
   - cryptography=37.0.1=py310h9ce1e76_0
@@ -138,11 +139,13 @@ dependencies:
   - notebook=6.4.12=py310h06a4308_0
   - nspr=4.33=h295c915_0
   - nss=3.74=h0370c37_0
+  - numexpr=2.8.3=py310hcea2de6_0
   - numpy=1.23.1=py310h1794996_0
   - numpy-base=1.23.1=py310hcba007f_0
   - openh264=2.1.1=h4ff587b_0
   - openssl=1.1.1s=h7f8727e_0
   - packaging=21.3=pyhd3eb1b0_0
+  - pandas=1.4.4=py310h6a678d5_0
   - pandocfilters=1.5.0=pyhd3eb1b0_0
   - parso=0.8.3=pyhd3eb1b0_0
   - pcre=8.45=h295c915_0
