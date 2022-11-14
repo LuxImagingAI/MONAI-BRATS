@@ -8,9 +8,9 @@
 #SBATCH --qos normal
 
 module load system/CUDA
+module load lang/Anaconda3/2020.11
 sleep 2s
-conda activate MONAI-BRATS
 
 nvidia-smi
-python python brats_deploy.py --input "data/Task01_BrainTumour/imagesTr" --output "output/labels" --model "output/models"
+conda run -n MONAI-BRATS python brats_deploy.py --input "data/Task01_BrainTumour/imagesTr" --output "output/labels" --model "output/models"
 

@@ -11,9 +11,9 @@
 epochs=50
 
 module load system/CUDA
+module load lang/Anaconda3/2020.11
 sleep 2s
-conda activate MONAI-BRATS
 
 nvidia-smi
-python brats_train.py --nfolds ${SLURM_ARRAY_TASK_COUNT} --fold ${SLURM_ARRAY_TASK_ID} --epochs $epochs
+conda run -n MONAI-BRATS python brats_train.py --nfolds ${SLURM_ARRAY_TASK_COUNT} --fold ${SLURM_ARRAY_TASK_ID} --epochs $epochs
 
