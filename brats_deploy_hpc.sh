@@ -12,5 +12,6 @@ module load lang/Anaconda3/2020.11
 sleep 2s
 
 nvidia-smi
-conda run -n MONAI-BRATS python brats_deploy.py --input "data/Task01_BrainTumour/imagesTr" --output "output/labels" --model "output/models"
+source activate MONAI-BRATS
+python brats_deploy.py --input "data/Task01_BrainTumour/imagesTr" --output "output/labels" --model "output/models"
 
