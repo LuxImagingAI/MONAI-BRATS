@@ -144,7 +144,7 @@ class MonaiSegInferenceBRATSOperator(Operator):
         @evaluator.on(Events.ITERATION_COMPLETED)
         def _save_output(engine):
             # Collect output and append to list
-            self.labels.append(engine.state.output[0])
+            self.labels.append(engine.state.output[0].to(device="cpu"))
 
         evaluator.run()
 
