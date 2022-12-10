@@ -7,7 +7,6 @@ from ignite.engine import Events
 from monai.data import Dataset, DataLoader
 from monai.deploy.core import DataPath, IOType, Image, InputContext, OutputContext, ExecutionContext, Operator
 from monai.deploy.exceptions import IOMappingError
-from monai.deploy.operators import InferenceOperator
 from typing import Any, Dict, Tuple, Union, Collection, Optional
 import monai.deploy.core as md
 from monai.transforms import Compose, EnsureTyped, MeanEnsembled, Lambda, SaveImage
