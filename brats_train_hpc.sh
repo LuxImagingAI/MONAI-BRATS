@@ -10,7 +10,6 @@
 
 epochs=50
 
-module load lang/Anaconda3/2020.11
 sleep 2s
 
 nvidia-smi
