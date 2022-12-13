@@ -1,3 +1,4 @@
+import time
 from copy import deepcopy
 
 from monai.apps import DecathlonDataset, CrossValidation
@@ -43,16 +44,26 @@ os.makedirs(metrics_dir, exist_ok=True)
 set_determinism(seed=0)
 
 
-# Create the dataset for training, CrossValidation queries another dataset (here: DecathlonDataset)
-cv_ds = CrossValidation(
-    root_dir=root_dir,
-    nfolds=nfolds,
-    dataset_cls=DecathlonDataset,
-    task="Task01_BrainTumour",
-    section="training",
-    download=True,
-    cache_rate=0.0
-)
+# Loop fixes the md5 checksum error
+# In the job array all jobs try to download and access the same file, this leads to errors sometimes
+# The download will be tried multiple times to avoid this
+for i in range(100):
+    try:
+        # Create the dataset for training, CrossValidation queries another dataset (here: DecathlonDataset)
+        cv_ds = CrossValidation(
+            root_dir=root_dir,
+            nfolds=nfolds,
+            dataset_cls=DecathlonDataset,
+            task="Task01_BrainTumour",
+            section="training",
+            download=True,
+            cache_rate=0.0
+        )
+    except:
+        time.sleep(30)
+    else:
+        break
+
 # Train folds are all folds except the validation fold
 train_folds = [n for n in range(nfolds) if n != fold]
 
