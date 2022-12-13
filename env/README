@@ -1,0 +1,10 @@
+Instructions for installing the environment and conda:
+
+1. Create interactive job: 'si --time=02:00:00 -c 7'
+
+2. Use 'source install_conda.sh' to install miniconda in your HOME directory (only use this ONCE)
+
+3. Use './create_environment.sh' to create the environment
+
+IMPORTANT: If you did not use 'source' but './' in the 2. step you have to
+execute the last 3 commands by yourself in the CLI
