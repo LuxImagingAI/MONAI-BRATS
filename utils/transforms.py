@@ -50,17 +50,11 @@ class ConvertToSingleChanneld(Transform):
     def __call__(self, data):
         shape = data.shape
         img = np.zeros(shape[1:])
-        print("img.shape:", img.shape)
         np.putmask(img, data[1],1)
         np.putmask(img, data[0],3)
         np.putmask(img, data[2],2)
-        print("img.shape:", img.shape)
-
-        # im = PIL.Image.fromarray(img[:,:,70].astype(np.uint8))
-        # im.save("output/labels/001.png")
 
         img_tensor = monai.data.MetaTensor(img, meta=data.meta)
-        print("img_tensor.shape:", img_tensor.shape)
         return img_tensor
 
 train_transform = Compose(
