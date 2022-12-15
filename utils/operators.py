@@ -14,6 +14,7 @@ from torch import nn
 
 from utils.model import inference
 from monai.engines import EnsembleEvaluator
+from utils.transforms import ConvertToSingleChanneld
 
 class Models(md.domain.Domain):
     def __init__(self, models: Union[Collection[nn.Module], nn.Module], read_only: bool = False, metadata: Optional[Dict] = None):
@@ -125,6 +126,7 @@ class MonaiSegInferenceBRATSOperator(Operator):
                 ),
                 Lambda(lambda x: x["image"]), # transforms dictionary based transform to normal transform
                 self.post_transforms,
+                ConvertToSingleChanneld(),
             ]
         )
 
