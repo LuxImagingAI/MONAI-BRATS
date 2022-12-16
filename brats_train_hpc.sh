@@ -10,10 +10,7 @@
 
 epochs=100
 
-sleep 2s
-
 nvidia-smi
-
 export PATH="$HOME/miniconda/bin:$PATH"
 source activate MONAI-BRATS
 
