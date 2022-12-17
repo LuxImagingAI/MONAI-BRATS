@@ -8,7 +8,7 @@
 #SBATCH --array=0-3         # Definition of job array
 #SBATCH --qos normal
 
-epochs=100
+epochs=50
 
 nvidia-smi
 export PATH="$HOME/miniconda/bin:$PATH"

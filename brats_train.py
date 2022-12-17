@@ -89,22 +89,26 @@ model = model.to(device) # might be redundant, SupervisedTrainer should do that
 torch.backends.cudnn.benchmark = True
 
 # Defining loss function and optimizer
+lr = 1e-4
 weight_decay = 1e-5
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=weight_decay)
+optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
 # Create handlers for training procedure
 dice_metric = DiceMetric(include_background=True, reduction="mean")
 dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 
 # Learning Rate Finder tries to find the optimal learning rate for the task in a pre-training epoch
-lr_finder = LearningRateFinder(model=deepcopy(model), optimizer=optimizer, criterion=deepcopy(loss_function), device=device)
-lr_finder.range_test(train_loader=deepcopy(train_loader), start_lr=1e-4, end_lr=1, num_iter=100)
-lr, _ = lr_finder.get_steepest_gradient()
-print(f"Optimal learning rate found: lr=", lr)
+# lr_finder = LearningRateFinder(model=deepcopy(model), optimizer=optimizer, criterion=deepcopy(loss_function), device=device)
+# lr_finder.range_test(train_loader=deepcopy(train_loader), start_lr=1e-4, end_lr=1, num_iter=100)
+# lr, _ = lr_finder.get_steepest_gradient()
+# print(f"Optimal learning rate found: lr=", lr)
 
 # Initialize new optimizer with found parameters
-optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+# optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+
 
 # Create a training procedure with the premade MONAI function for supervised training
 trainer = SupervisedTrainer(
@@ -161,6 +165,8 @@ def _compute_score(engine):
             f"current mean dice: {metric:.4f}"
             f" tc: {metric_tc:.4f} wt: {metric_wt:.4f} et: {metric_et:.4f}"
         )
+
+        scheduler.step()
 
 # Run the training procedure
 trainer.run()
