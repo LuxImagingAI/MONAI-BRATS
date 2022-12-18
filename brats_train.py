@@ -99,13 +99,13 @@ dice_metric = DiceMetric(include_background=True, reduction="mean")
 dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 
 # Learning Rate Finder tries to find the optimal learning rate for the task in a pre-training epoch
-lr_finder = LearningRateFinder(model=deepcopy(model), optimizer=optimizer, criterion=deepcopy(loss_function), device=device)
-lr_finder.range_test(train_loader=deepcopy(train_loader), start_lr=1e-5, end_lr=1, num_iter=100)
-lr, _ = lr_finder.get_steepest_gradient()
-print(f"Optimal learning rate found: lr=", lr)
+# lr_finder = LearningRateFinder(model=deepcopy(model), optimizer=optimizer, criterion=deepcopy(loss_function), device=device)
+# lr_finder.range_test(train_loader=deepcopy(train_loader), start_lr=1e-5, end_lr=1, num_iter=100)
+# lr, _ = lr_finder.get_steepest_gradient()
+# print(f"Optimal learning rate found: lr=", lr)
 
 # Initialize new optimizer with found parameters
-optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+# optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
 # Cosine annealing
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
@@ -177,17 +177,6 @@ metric_dict = {
     "metric_values_wt": metric_values_wt,
     "metric_values_et": metric_values_et
 }
-
-# Remove contents present in the output folders
-model_file_names = [f for f in os.listdir(model_dir) if os.path.isfile(os.path.join(model_dir, f))]
-metric_file_names = [f for f in os.listdir(metrics_dir) if os.path.isfile(os.path.join(metrics_dir, f))]
-
-for f in model_file_names:
-    os.remove(os.path.join(model_dir, f))
-
-for f in metric_file_names:
-    os.remove(os.path.join(metrics_dir, f))
-
 
 # Save models and metrics
 with open(os.path.join(metrics_dir, f"metric_fold_{fold}.pkl"), "wb") as handle:
