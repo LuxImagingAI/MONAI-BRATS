@@ -94,8 +94,6 @@ weight_decay = 1e-5
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
 optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
-
 # Create handlers for training procedure
 dice_metric = DiceMetric(include_background=True, reduction="mean")
 dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
@@ -109,6 +107,8 @@ print(f"Optimal learning rate found: lr=", lr)
 # Initialize new optimizer with found parameters
 optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
+# Cosine annealing
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
 # Create a training procedure with the premade MONAI function for supervised training
 trainer = SupervisedTrainer(
