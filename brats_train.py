@@ -60,7 +60,7 @@ for i in range(100):
             cache_rate=0.0
         )
     except:
-        time.sleep(30)
+        time.sleep(60)
     else:
         break
 
@@ -73,9 +73,9 @@ val_ds = cv_ds.get_dataset(folds=fold, transform=val_transform)
 
 # Create data loaders from the two datasets
 # The dataloader is an iterable object which returns the elements of the dataset
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=4)
 print(f"Train dataloader with folds {train_folds} created")
-val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=0)
+val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
 print(f"Validation dataloader with fold {fold} created")
 
 # Check if CUDA is available and set device accordingly
