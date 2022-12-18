@@ -15,3 +15,4 @@ source activate MONAI-BRATS
 
 python brats_deploy.py --input "data/Task01_BrainTumour/imagesTr" --output "output/labels" --model "output/models"
 
+
