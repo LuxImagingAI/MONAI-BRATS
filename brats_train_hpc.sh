@@ -5,10 +5,10 @@
 #SBATCH -p gpu              # Job-type, can be batch (only CPU) or gpu
 #SBATCH -G 1                # Number of GPUs for the job
 #SBATCH --time=0-30:00:00   # Time limit
-#SBATCH --array=0-3         # Definition of job array
+#SBATCH --array=0-4         # Definition of job array
 #SBATCH --qos normal
 
-epochs=50
+epochs=100
 
 nvidia-smi
 export PATH="$HOME/miniconda/bin:$PATH"

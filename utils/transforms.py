@@ -46,7 +46,7 @@ class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
             d[key] = torch.stack(result, axis=0).float()
         return d
 
-class ConvertToSingleChanneld(Transform):
+class ConvertToSingleChannel(Transform):
     def __call__(self, data):
         shape = data.shape
         img = np.zeros(shape[1:])

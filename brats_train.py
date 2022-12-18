@@ -73,9 +73,9 @@ val_ds = cv_ds.get_dataset(folds=fold, transform=val_transform)
 
 # Create data loaders from the two datasets
 # The dataloader is an iterable object which returns the elements of the dataset
-train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=4)
+train_loader = DataLoader(train_ds, batch_size=1, shuffle=True, num_workers=0)
 print(f"Train dataloader with folds {train_folds} created")
-val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=4)
+val_loader = DataLoader(val_ds, batch_size=1, shuffle=False, num_workers=0)
 print(f"Validation dataloader with fold {fold} created")
 
 # Check if CUDA is available and set device accordingly
@@ -177,6 +177,17 @@ metric_dict = {
     "metric_values_wt": metric_values_wt,
     "metric_values_et": metric_values_et
 }
+
+# Remove contents present in the output folders
+model_file_names = [f for f in os.listdir(model_dir) if os.path.isfile(os.path.join(model_dir, f))]
+metric_file_names = [f for f in os.listdir(metrics_dir) if os.path.isfile(os.path.join(metrics_dir, f))]
+
+for f in model_file_names:
+    os.remove(os.path.join(model_dir, f))
+
+for f in metric_file_names:
+    os.remove(os.path.join(metrics_dir, f))
+
 
 # Save models and metrics
 with open(os.path.join(metrics_dir, f"metric_fold_{fold}.pkl"), "wb") as handle:
