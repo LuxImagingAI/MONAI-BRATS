@@ -1,3 +1,4 @@
+import PIL.Image
 from monai.transforms import (
     Activations,
     AsDiscrete,
@@ -15,6 +16,8 @@ from monai.transforms import (
     EnsureChannelFirstd, EnsureChannelFirst, EnsureType, Orientation, Spacing, NormalizeIntensity, LoadImage, Transform,
 )
 import torch
+import numpy as np
+import monai
 
 
 class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
@@ -42,6 +45,17 @@ class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
             result.append(d[key] == 2)
             d[key] = torch.stack(result, axis=0).float()
         return d
+
+class ConvertToSingleChannel(Transform):
+    def __call__(self, data):
+        shape = data.shape
+        img = np.zeros(shape[1:])
+        np.putmask(img, data[1],1)
+        np.putmask(img, data[0],3)
+        np.putmask(img, data[2],2)
+
+        img_tensor = monai.data.MetaTensor(img, meta=data.meta)
+        return img_tensor
 
 train_transform = Compose(
     [
@@ -102,4 +116,3 @@ post_trans = Compose(
         AsDiscrete(threshold=0.5)
     ]
 )
-

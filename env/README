@@ -2,9 +2,11 @@ Instructions for installing the environment and conda:
 
 1. Create interactive job: 'si --time=02:00:00 -c 7'
 
-2. Use 'source install_conda.sh' to install miniconda in your HOME directory (only use this ONCE)
+2. Use 'source install_conda.sh' to install miniconda in your HOME directory
 
 3. Use './create_environment.sh' to create the environment
 
-IMPORTANT: If you did not use 'source' but './' in the 2. step you have to
-execute the last 3 commands by yourself in the CLI
+IMPORTANT: If you want to use conda in your own projects on the hpc you need to execute
+'export PATH="$HOME/miniconda/bin:$PATH"' first. The scripts 'brats_train_hpc.sh'
+and 'brats_deploy_hpc.sh' already include this line, therefore you can run them without
+any modifications.

@@ -14,6 +14,7 @@ from torch import nn
 
 from utils.model import inference
 from monai.engines import EnsembleEvaluator
+from utils.transforms import ConvertToSingleChannel
 
 class Models(md.domain.Domain):
     def __init__(self, models: Union[Collection[nn.Module], nn.Module], read_only: bool = False, metadata: Optional[Dict] = None):
@@ -105,6 +106,7 @@ class MonaiSegInferenceBRATSOperator(Operator):
     def compute(self, op_input: InputContext, op_output: OutputContext, context: ExecutionContext):
         t = time.time()
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print("Using device: ", device)
 
         # Get data from input
         image_file_paths = op_input.get("image").paths
@@ -125,6 +127,7 @@ class MonaiSegInferenceBRATSOperator(Operator):
                 ),
                 Lambda(lambda x: x["image"]), # transforms dictionary based transform to normal transform
                 self.post_transforms,
+                ConvertToSingleChannel(),
             ]
         )
 
