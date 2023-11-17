@@ -92,15 +92,19 @@ torch.backends.cudnn.benchmark = True
 lr = 1e-4
 weight_decay = 1e-5
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
-optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
 # Create handlers for training procedure
 dice_metric = DiceMetric(include_background=True, reduction="mean")
 dice_metric_batch = DiceMetric(include_background=True, reduction="mean_batch")
 
 # Learning Rate Finder tries to find the optimal learning rate for the task in a pre-training epoch
-lr_finder = LearningRateFinder(model=deepcopy(model), optimizer=optimizer, criterion=deepcopy(loss_function), device=device)
-lr_finder.range_test(train_loader=deepcopy(train_loader), start_lr=1e-5, end_lr=1, num_iter=100)
+model_copy = deepcopy(model)
+criterion_copy = deepcopy(loss_function)
+train_loader_copy = deepcopy(train_loader)
+optimizer_copy = torch.optim.Adam(model_copy.parameters(), lr=lr, weight_decay=weight_decay)
+
+lr_finder = LearningRateFinder(model=model_copy, optimizer=optimizer_copy, criterion=criterion_copy, device=device)
+lr_finder.range_test(train_loader=train_loader_copy, start_lr=1e-7, end_lr=1, num_iter=100)
 lr, _ = lr_finder.get_steepest_gradient()
 print(f"Optimal learning rate found: lr=", lr)
 
