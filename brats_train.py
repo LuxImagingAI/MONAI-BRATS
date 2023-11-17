@@ -123,7 +123,7 @@ trainer = SupervisedTrainer(
     optimizer=optimizer,
     loss_function=loss_function,
     inferer=inference,
-    amp=True
+    amp=False
 )
 
 # Metrics for later use
