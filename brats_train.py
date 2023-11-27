@@ -18,6 +18,7 @@ import argparse
 
 from utils.transforms import train_transform, val_transform, post_trans
 from utils.model import inference, model
+import numpy as np
 
 # Parsing arguments (epochs, number of folds, validation fold)
 parser = argparse.ArgumentParser()
@@ -167,7 +168,9 @@ metric_dict = {
     "metric_values": metric_values,
     "metric_values_tc": metric_values_tc,
     "metric_values_wt": metric_values_wt,
-    "metric_values_et": metric_values_et
+    "metric_values_et": metric_values_et, 
+    "epoch": np.arange(epochs), 
+    "fold": np.full(epochs, fold)
 }
 
 # Save models and metrics
