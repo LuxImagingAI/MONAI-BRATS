@@ -90,8 +90,8 @@ model = model.to(device) # might be redundant, SupervisedTrainer should do that
 torch.backends.cudnn.benchmark = True
 
 # Defining loss function and optimizer
-lr = 1e-4
-weight_decay = 1e-5
+lr = 1e-3
+weight_decay = 1e-4
 loss_function = DiceLoss(smooth_nr=0, smooth_dr=1e-5, squared_pred=True, to_onehot_y=False, sigmoid=True)
 optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
