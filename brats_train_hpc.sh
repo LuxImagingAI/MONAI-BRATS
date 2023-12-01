@@ -8,12 +8,10 @@
 #SBATCH --array=0-3         # Definition of job array
 #SBATCH --qos normal
 
-epochs=25
+epochs=100
 
+conda activate MONAI-BRATS
 nvidia-smi
-export PATH="$HOME/miniconda/bin:$PATH"
-source activate MONAI-BRATS
-ulimit -n 2048
-
 python brats_train.py --nfolds ${SLURM_ARRAY_TASK_COUNT} --fold ${SLURM_ARRAY_TASK_ID} --epochs $epochs
+
 
